@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
+import matplotlib as plt
 import statsmodels.api as sm
 from scipy.stats import bootstrap
 
@@ -75,3 +76,53 @@ coef_table = results.params.to_frame(name="coef")
 coef_table.index.name = "Variable"
 
 latex_table = coef_table.to_latex(float_format="%.4f")
+
+# Split data
+bp_N = ist_df[ist_df["Aspirin Allocated"] == "N"]["Systolic BP"]
+bp_Y = ist_df[ist_df["Aspirin Allocated"] == "Y"]["Systolic BP"]
+
+# Create boxplot
+plt.figure(figsize=(6, 5))
+plt.boxplot([bp_N, bp_Y], labels=["No Aspirin (N)", "Aspirin (Y)"])
+
+plt.title("Systolic BP by Aspirin Allocation")
+plt.ylabel("Systolic Blood Pressure (mmHg)")
+plt.grid(axis='y')
+
+plt.show()
+
+# Count records by AGE + Aspirin allocation
+age_counts = ist_df.groupby(["AGE", "Aspirin Allocated"]).size().unstack(fill_value=0)
+
+# Prepare data
+ages = age_counts.index
+aspirin = age_counts["Y"]
+no_aspirin = age_counts["N"]
+
+# Plot
+plt.figure(figsize=(10, 5))
+
+plt.bar(ages, no_aspirin, color="red", label="No Aspirin")
+plt.bar(ages, aspirin, bottom=no_aspirin, color="green", label="Aspirin")
+
+plt.title("Distribution of age by aspirin allocation")
+plt.xlabel("AGE")
+plt.ylabel("Count")
+plt.legend()
+
+plt.show()
+
+
+plt.figure(figsize=(8,5))
+plt.scatter(mean_var["mean"], mean_var["variance"], alpha=0.7, label="Observed")
+
+# Add theoretical binomial curve y = p(1-p)
+p = np.linspace(0, 1, 300)
+plt.plot(p, p*(1-p), color="red", linewidth=2, label="Binomial variance: p(1-p)")
+
+
+plt.xlabel("Mean")
+plt.ylabel("Variance")
+plt.title("Mean vs Variance")
+plt.grid(True)
+plt.show()
